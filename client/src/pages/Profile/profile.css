@@ -1,0 +1,18 @@
+.profile_div img{
+    max-width: 73px;
+    border-radius: 50%;
+    object-fit: contain;
+    border: 2px solid black;
+}
+
+.email{
+    color: rgb(101, 151, 238)
+}
+
+.location{
+    color: blue;
+}
+
+.cal{
+    color: rgb(0, 70, 128);
+}
