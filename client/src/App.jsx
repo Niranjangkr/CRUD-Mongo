@@ -8,7 +8,7 @@ import { Routes, Route } from 'react-router-dom';
 function App() {
 
   return (
-    <>
+    <>  
       <Headers />
       <Routes>
         <Route path='/' element={<Home />} />

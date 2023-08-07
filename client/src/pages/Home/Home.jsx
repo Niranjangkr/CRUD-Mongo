@@ -1,4 +1,4 @@
-import React,{ useEffect, useState } from 'react'
+import React,{ useContext, useEffect, useState } from 'react'
 import './home.css'
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
@@ -8,8 +8,13 @@ import SortIcon from '@mui/icons-material/Sort';
 import { useNavigate } from 'react-router-dom'; 
 import Tables from '../../components/Tables/Tables';
 import { Spinner } from '../../components';
+import { addData } from '../../components/context/ContextProvider';
+import { ToastContainer, toast } from 'react-toastify';
+import { getAllUser } from '../../services/Apis'
 
 const Home = () => {
+  const [ formData, setFormData ] = useState([])
+  const { udata, setudata } = useContext(addData);
   const navigate = useNavigate();
   const [ showSpin, setShowSpin ] = useState(true);
   useEffect(()=> {
@@ -17,10 +22,25 @@ const Home = () => {
         setShowSpin(false)
     },1200)
   },[])
+
+  useEffect(() => {
+    try {
+      (async()=>{
+        const data = await getAllUser();
+        setFormData(data.data);
+      })()
+    } catch (error) {
+      console.log(error)
+    }
+  },[])
+
   return (
     <>
+    {
+      udata?toast.success(`New User ${udata.fname.toUpperCase()} added Successfully`):''
+    }
       <div className="container">
-        <div className="main_div">
+        < div className="main_div">
           {/* search and adduser btn */}
           <div className="search_add mt-4 d-flex justify-content-between">
             <div className="search col-lg-4">
@@ -111,9 +131,28 @@ const Home = () => {
               </div>
             </div>
           </div>
-          {showSpin?<Spinner/>:<Tables />}
+          {showSpin?<Spinner/>:<Tables data = {formData} />}
         </div>
       </div>
+      <ToastContainer
+      position="top-right"
+      autoClose={5000}
+      hideProgressBar={false}
+      newestOnTop={false}
+      closeOnClick
+      rtl={false}
+      pauseOnFocusLoss
+      draggable
+      pauseOnHover
+      theme="light"
+      />
+      {/* Same as */}
+      <ToastContainer />
+      {/* <>
+        {
+          formData.map((ele) => <div>{ele}</div>)
+        }
+      </> */}
     </>
   )
 }

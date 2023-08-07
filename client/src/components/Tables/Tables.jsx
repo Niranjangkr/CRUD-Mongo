@@ -10,9 +10,11 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import './table.css'
+import { BASE_URL } from '../../services/helper'
 
-
-const Tables = () => {
+const Tables = ({ data }) => {
+  // data.map(ele => console.log(ele.fname))
+  data.reverse();
   return (
     <div className="container">
       <Row>
@@ -31,41 +33,48 @@ const Tables = () => {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>1</td>
-                  <td>Niranjan</td>
-                  <td>niran@gmail.com</td>
-                  <td>M</td>
-                  <td className='d-flex align-items-center'>
-                    <Dropdown className='text-center'>
-                      <Dropdown.Toggle className='dropdown_btn' id="dropdown-basic">
-                        <Badge className='bg-primary'>
-                          Active
-                          <KeyboardArrowDownIcon />
-                        </Badge>
-                      </Dropdown.Toggle>
-                      <Dropdown.Menu>
-                        <Dropdown.Item >Active</Dropdown.Item>
-                        <Dropdown.Item >InActive</Dropdown.Item>
-                      </Dropdown.Menu>
-                    </Dropdown>
-                  </td>
-                  <td className='img_parent'>
-                    <img src="/R.png" alt="" />
-                  </td>
-                  <td>
-                    <Dropdown className='text-center'>
-                      <Dropdown.Toggle variant='light' className='action' id="dropdown-basic">
-                        <MoreVertIcon />
-                      </Dropdown.Toggle>
-                      <Dropdown.Menu>
-                        <Dropdown.Item ><VisibilityIcon style={{ color: 'green' }} />&nbsp;View</Dropdown.Item>
-                        <Dropdown.Item ><EditIcon style={{ color: 'blue' }} />&nbsp;Edit</Dropdown.Item>
-                        <Dropdown.Item ><DeleteIcon style={{ color: 'red' }} />&nbsp;Delete</Dropdown.Item>
-                      </Dropdown.Menu>
-                    </Dropdown>
-                  </td>
-                </tr>
+                { data.length > 0?
+                  data.map((ele, index) => {
+                    return (
+                      <tr key={index}>
+                        <td>{index + 1}</td>
+                        <td>{ele.fname} {ele.lname}</td>
+                        <td>{ele.email}</td>
+                        <td>{ele.gender[0]}</td>
+                        <td className='d-flex align-items-center'>
+                          <Dropdown className='text-center'>
+                            <Dropdown.Toggle className='dropdown_btn' id="dropdown-basic">
+                              <Badge className={ele.Status==='Active'?'bg-primary':'bg-danger'}>
+                                {ele.Status}
+                                <KeyboardArrowDownIcon />
+                              </Badge>
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu>
+                              <Dropdown.Item >Active</Dropdown.Item>
+                              <Dropdown.Item >InActive</Dropdown.Item>
+                            </Dropdown.Menu>
+                          </Dropdown>
+                        </td>
+                        <td className='img_parent'>
+                          <img src={`${BASE_URL}/uploads/${ele.profile}`} alt="img" />
+                        </td>
+                        <td>
+                          <Dropdown className='text-center'>
+                            <Dropdown.Toggle variant='light' className='action' id="dropdown-basic">
+                              <MoreVertIcon />
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu>
+                              <Dropdown.Item ><VisibilityIcon style={{ color: 'green' }} />&nbsp;View</Dropdown.Item>
+                              <Dropdown.Item ><EditIcon style={{ color: 'blue' }} />&nbsp;Edit</Dropdown.Item>
+                              <Dropdown.Item ><DeleteIcon style={{ color: 'red' }} />&nbsp;Delete</Dropdown.Item>
+                            </Dropdown.Menu>
+                          </Dropdown>
+                        </td>
+                      </tr>
+                    )
+                  }): <div className='no_data text-center'>No Data Found</div>
+                }
+
               </tbody>
             </Table>
           </Card>
