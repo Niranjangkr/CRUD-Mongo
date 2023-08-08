@@ -1,11 +1,11 @@
 import axios from 'axios'
 
-export const commmonfunction = (methods, url, body, headers) => {
+export const commmonfunction = (methods, url, body, header) => {
     let config = {
         method: methods,
         url,
-        headers: headers ?
-        headers : {
+        headers: header ?
+        header : {
             'Content-type': 'application/json'
         },
         data: body
@@ -13,7 +13,7 @@ export const commmonfunction = (methods, url, body, headers) => {
 
     // axios instance
     return axios(config).then((data) => {
-    return data;  
+        return data;  
     }).catch((error) => {
         return error
     })

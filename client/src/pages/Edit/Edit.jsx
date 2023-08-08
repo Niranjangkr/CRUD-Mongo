@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import './edit.css'
 import Card from 'react-bootstrap/Card'
 import Button from 'react-bootstrap/Button';
@@ -8,9 +8,15 @@ import Select from 'react-select';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Spinner } from '../../components';
+import { getSingleUser, updateUser } from '../../services/Apis';
+import { useNavigate, useParams } from 'react-router-dom';
+import { BASE_URL } from '../../services/helper';
+import { updateData } from '../../components/context/ContextProvider';
 
 const Edit = () => {
 
+  const { updateU, setUpdateUser } = useContext(updateData);
+  const navigate = useNavigate();
   const [ showSpin, setShowSpin ] = useState(true);
   const [formData, setFormData] = useState({
     fname: '',
@@ -23,6 +29,11 @@ const Edit = () => {
   const [status, setStatus] = useState('Active');
   const [image, setImgae] = useState('');
   const [preview, setPreview] = useState('')
+
+  // setting up the user email from server
+  const [ imageData, setImageData ] = useState("");
+
+  console.log(status)
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -52,7 +63,7 @@ const Edit = () => {
   }, [image]);
 
   // on form submit
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const { fname, lname, email, mobile, gender, location } = formData
     if (fname === ''){
@@ -71,10 +82,29 @@ const Edit = () => {
       toast.error("location is required");
   }else if(status === ''){
     toast.error("status is required");
-  }else if(image === ''){
-    toast.error("Profile is required");
   }else{
-    toast.success("Registration is successful")
+   const data = new FormData;
+   data.append("fname",fname);
+   data.append("lname", lname);
+   data.append("email", email);
+   data.append("mobile", mobile);
+   data.append("gender", gender);
+   data.append("location", location);
+   data.append("Status", status);
+   data.append("user_profile", image || imageData);
+
+   const config ={
+    "Content-Type" : "multipart/form-data" 
+   }
+
+   const response = await updateUser(id, data, config);
+   if(response.status === 200){
+    setUpdateUser(response.data)
+    navigate('/');
+   }else{
+    toast.error("Cant update your data try again later...",response.status)
+   }
+
   }
 }
 
@@ -83,6 +113,19 @@ const Edit = () => {
     { value: 'InActive', label: 'InActive' },
   ];
 
+
+  //  fetching user data to display
+  const {id} = useParams();
+  
+  useEffect(() =>{
+    ( async() => {
+      const data = await getSingleUser(id);
+      setFormData(data.data);
+      setStatus(data.data.Status);
+      setImageData(data.data.profile);
+    })()
+  },[]);
+  
   return (
     <>
     {
@@ -91,7 +134,7 @@ const Edit = () => {
       <h2 className='text-center mt-1'>Update Your Details</h2>
       <Card className='shadow mt-3 p-3'>
         <div className="profile_div text-center ">
-          <img src={preview ? preview : `/R.png`} alt="image" />
+          <img src={image ? preview : `${BASE_URL}/uploads/${imageData}`} alt="image" />
         </div>
         <Form onSubmit={handleSubmit}>
           <Row>

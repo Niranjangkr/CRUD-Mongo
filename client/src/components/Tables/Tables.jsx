@@ -11,10 +11,10 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import './table.css'
 import { BASE_URL } from '../../services/helper'
+import { NavLink } from 'react-router-dom'
 
-const Tables = ({ data }) => {
+const Tables = ({ data, handleDelete, searchedData }) => {
   // data.map(ele => console.log(ele.fname))
-  data.reverse();
   return (
     <div className="container">
       <Row>
@@ -33,7 +33,9 @@ const Tables = ({ data }) => {
                 </tr>
               </thead>
               <tbody>
-                { data.length > 0?
+                { searchedData && searchedData.length > 0?
+                <td>searcheddata</td>:
+                  data&&data.length > 0?
                   data.map((ele, index) => {
                     return (
                       <tr key={index}>
@@ -56,7 +58,7 @@ const Tables = ({ data }) => {
                           </Dropdown>
                         </td>
                         <td className='img_parent'>
-                          <img src={`${BASE_URL}/uploads/${ele.profile}`} alt="img" />
+                        <img src={`${BASE_URL}/uploads/${ele.profile}`} alt="img" />
                         </td>
                         <td>
                           <Dropdown className='text-center'>
@@ -64,19 +66,19 @@ const Tables = ({ data }) => {
                               <MoreVertIcon />
                             </Dropdown.Toggle>
                             <Dropdown.Menu>
-                              <Dropdown.Item ><VisibilityIcon style={{ color: 'green' }} />&nbsp;View</Dropdown.Item>
-                              <Dropdown.Item ><EditIcon style={{ color: 'blue' }} />&nbsp;Edit</Dropdown.Item>
-                              <Dropdown.Item ><DeleteIcon style={{ color: 'red' }} />&nbsp;Delete</Dropdown.Item>
+                             <Dropdown.Item ><NavLink to={`/userprofile/${ele._id}`} className="text-decoration-none"><VisibilityIcon style={{ color: 'green' }} />&nbsp;View</NavLink></Dropdown.Item>
+                              <Dropdown.Item ><NavLink to={`/edit/${ele._id}`} className="text-decoration-none"><EditIcon style={{ color: 'blue' }} />&nbsp;Edit</NavLink></Dropdown.Item>
+                              <Dropdown.Item onClick={() =>handleDelete(ele._id)}><DeleteIcon style={{ color: 'red' }} />&nbsp;Delete</Dropdown.Item>
                             </Dropdown.Menu>
                           </Dropdown>
                         </td>
                       </tr>
                     )
-                  }): <div className='no_data text-center'>No Data Found</div>
+                  }): < tr className='no_data text-center'><td>No Data Found</td></tr>
                 }
 
               </tbody>
-            </Table>
+            </Table>  
           </Card>
         </div>
       </Row>

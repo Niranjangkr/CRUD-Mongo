@@ -9,14 +9,15 @@ const router =  require('./routes/router');
 
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static('./uploads'));
+app.use("/uploads",express.static("./uploads"));
+
 
 app.use(router);
 
 const start = async () => {
   try {
     await mongodbConnect(URL);
-    app.listen(PORT, () => {
+    app.listen(PORT, () => { 
     console.log(`Server running at port ${PORT}`);
     });
   } catch (error) {

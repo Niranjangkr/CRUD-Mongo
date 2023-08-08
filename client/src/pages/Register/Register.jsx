@@ -87,7 +87,7 @@ const Register = () => {
       data.append("gender", gender);
       data.append("location", location);
       data.append("Status", status);
-      data.append("user_profile", image);
+      data.append("user_profile", image );
 
       let config = {
         "Content-Type": "multipart/form-data"

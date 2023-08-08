@@ -8,11 +8,17 @@ import SortIcon from '@mui/icons-material/Sort';
 import { useNavigate } from 'react-router-dom'; 
 import Tables from '../../components/Tables/Tables';
 import { Spinner } from '../../components';
-import { addData } from '../../components/context/ContextProvider';
+import { addData, updateData, deleteUser } from '../../components/context/ContextProvider';
 import { ToastContainer, toast } from 'react-toastify';
 import { getAllUser } from '../../services/Apis'
+import Alert from 'react-bootstrap/Alert'
+import { deleteSingleUser, searchData } from '../../services/Apis'
 
 const Home = () => {
+  const [searchedData, setSearchData ] = useState([]);
+  const [ search, setSearch ] = useState('');
+  const {delUser, setDelUser} = useContext(deleteUser);
+  const {updateU, setUpdateUser } = useContext(updateData);
   const [ formData, setFormData ] = useState([])
   const { udata, setudata } = useContext(addData);
   const navigate = useNavigate();
@@ -23,6 +29,7 @@ const Home = () => {
     },1200)
   },[])
 
+  // getting all user
   useEffect(() => {
     try {
       (async()=>{
@@ -32,12 +39,61 @@ const Home = () => {
     } catch (error) {
       console.log(error)
     }
-  },[])
+  },[udata])
 
+  // deleteUser
+  const handleDelete =  async(id) => {
+    const data = await deleteSingleUser(id);
+    if(data.status === 200){
+      console.log(data, data.status);
+      setDelUser(data.data);
+      const udata = await getAllUser();
+      setFormData(udata.data);
+    }else{
+      toast.error("Cant delete user try again later")
+    }
+  }
+
+  // for search field 
+  const fetchSearchData = async() => {
+    const response = await searchData(search);
+    setSearchData(response.data);
+  }
+  const prevData = async() => {
+    const data = await getAllUser();
+    setFormData(data.data);
+    console.log(formData)
+  }
+
+  useEffect(() => {
+    // make an api call 
+    if(search.trim() != ''){
+      const debounce = setTimeout(() => {
+        console.log("hitting api") 
+        fetchSearchData();
+      }, 500)
+
+      return () => clearTimeout(debounce);
+    }
+    if(search == ''){
+      console.log("am in")
+      prevData()
+    }
+  },[search])
+
+  const handleSearch = async(e) =>{
+    const { value } = e.target;
+    setSearch(value)
+  }
   return (
     <>
     {
-      udata?toast.success(`New User ${udata.fname.toUpperCase()} added Successfully`):''
+      udata?(<Alert variant="success" onClose={() =>setudata("")} dismissible>{udata.fname.toUpperCase()} Successfully Added</Alert>)  :''
+        ||
+        updateU?(<Alert variant="primary" onClose={() =>setUpdateUser("")} dismissible>{updateU.fname.toUpperCase()} Successfully Updated</Alert>) : ''
+        ||
+        delUser?(<Alert variant="danger" onClose={() =>setDelUser("")} dismissible>{delUser.fname.toUpperCase()} User Deleted</Alert>) : ''
+      
     }
       <div className="container">
         < div className="main_div">
@@ -50,6 +106,8 @@ const Home = () => {
                   placeholder="Search"
                   className="me-2"
                   aria-label="Search"
+                  onChange={handleSearch}
+                  // value={search}
                 />
                 <Button variant="success" className='search_btn'>Search</Button>
               </Form>
@@ -91,7 +149,7 @@ const Home = () => {
             </div>
             {/* sort by value */}
             <div className="filter_newold">
-              <h3>Sort By Value</h3>
+              <h3>Sort By Value</h3>  
               <Dropdown className='text-center'>
                 <Dropdown.Toggle className='dropdown_btn' id="dropdown-basic">
                   <SortIcon />
@@ -131,7 +189,7 @@ const Home = () => {
               </div>
             </div>
           </div>
-          {showSpin?<Spinner/>:<Tables data = {formData} />}
+          {showSpin?<Spinner/>:<Tables data = {formData} handleDelete ={handleDelete} searchedData = {searchedData}/>}
         </div>
       </div>
       <ToastContainer
