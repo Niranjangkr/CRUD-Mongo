@@ -24,6 +24,8 @@ const Profile = () => {
     })()
   }, []);
   let date = userData.dateCreated
+  let updateDate = userData.dateUpdated
+  console.log(updateDate)
 
   useEffect(() => {
     setTimeout(() => {
@@ -50,7 +52,7 @@ const Profile = () => {
             <h4><PlaceIcon className='location'/>&nbsp;:-<span>{userData.location}</span></h4>
             <h4>Status&nbsp;:-<span>{userData.Status}</span></h4>
             <h5><CalendarMonthIcon className='cal'/>&nbsp;Date Created&nbsp;:-<span>{date}</span></h5>
-            <h5><CalendarMonthIcon className='cal'/>&nbsp;Date Updated&nbsp;:-<span> 05/07/2002</span></h5>
+            <h5><CalendarMonthIcon className='cal'/>&nbsp;Date Updated&nbsp;:-<span>{updateDate?updateDate:"Not updated"}</span></h5>
           </div>
         </Card.Body>
       </Card>

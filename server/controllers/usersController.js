@@ -41,8 +41,25 @@ exports.userpost = async(req, res) =>{
 
 // get all user
 exports.getAllUser = async(req, res) =>{
+    console.log(req.query)
+    const search = req.query.search || "";
+    const gender = req.query.gender || "";
+    const status = req.query.status || "";
+    const order  = req.query.order  || "";
+    
+    const query = {
+        fname: {$regex:search, $options: "i"}
+    }
+    if(gender !== "All"){
+        query.gender = gender
+    }
+    if(status !== "All"){
+        query.Status = status
+    }
+
+    console.log(query)
     try {
-        const data =  await Users.find();
+        const data =  await Users.find(query).sort({dateCreated: order === 'new'? -1: 1});
         return res.status(200).json(data);
     } catch (error) {
         res.status(500).json({"error":error});
@@ -117,5 +134,16 @@ exports.Search = async(req, res) => {
         res.status(200).json(data);
     } catch (error) {
         res.status(500).json({"error":error})
+    }
+}
+
+exports.updatestatus = async(req, res) => {
+    const { id } = req.params;
+    const { data } = req.body;
+    try { 
+        const response = await Users.findByIdAndUpdate({_id: id}, {Status: data},{new: true})
+        res.status(200).json(response);
+    } catch (error) {
+        res.status(500).json(error  );
     }
 }

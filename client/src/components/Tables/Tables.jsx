@@ -12,8 +12,20 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import './table.css'
 import { BASE_URL } from '../../services/helper'
 import { NavLink } from 'react-router-dom'
+import { updateUserStatus, getAllUser } from '../../services/Apis'
+import { toast } from 'react-toastify'
 
-const Tables = ({ data, handleDelete, searchedData }) => {
+const Tables = ({ data, handleDelete, searchedData, getUser }) => {
+
+  const handleClick = async (id, Status) => {
+      const response = await updateUserStatus(id, Status);  
+      if(response.status === 200){
+        getUser();
+        toast.success ("status updated")
+      }else(
+        toast.error("Error updating status")
+      )
+  }
   // data.map(ele => console.log(ele.fname))
   return (
     <div className="container">
@@ -52,8 +64,8 @@ const Tables = ({ data, handleDelete, searchedData }) => {
                               </Badge>
                             </Dropdown.Toggle>
                             <Dropdown.Menu>
-                              <Dropdown.Item >Active</Dropdown.Item>
-                              <Dropdown.Item >InActive</Dropdown.Item>
+                              <Dropdown.Item onClick={() => handleClick(ele._id, "Active")}>Active</Dropdown.Item>
+                              <Dropdown.Item onClick={() => handleClick(ele._id, "InActive")}>InActive</Dropdown.Item>
                             </Dropdown.Menu>
                           </Dropdown>
                         </td>

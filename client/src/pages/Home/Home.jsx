@@ -1,100 +1,87 @@
-import React,{ useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import './home.css'
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import AddIcon from '@mui/icons-material/Add';
 import Dropdown from 'react-bootstrap/Dropdown';
 import SortIcon from '@mui/icons-material/Sort';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 import Tables from '../../components/Tables/Tables';
 import { Spinner } from '../../components';
 import { addData, updateData, deleteUser } from '../../components/context/ContextProvider';
 import { ToastContainer, toast } from 'react-toastify';
 import { getAllUser } from '../../services/Apis'
 import Alert from 'react-bootstrap/Alert'
-import { deleteSingleUser, searchData } from '../../services/Apis'
+import { deleteSingleUser } from '../../services/Apis'
 
 const Home = () => {
-  const [searchedData, setSearchData ] = useState([]);
-  const [ search, setSearch ] = useState('');
-  const {delUser, setDelUser} = useContext(deleteUser);
-  const {updateU, setUpdateUser } = useContext(updateData);
-  const [ formData, setFormData ] = useState([])
+  
+  const [order, setOrder] = useState("new")
+  const [status, setStatus] = useState("All")
+  const [gender, setGender] = useState("All")
+  const [searchedData, setSearchData] = useState([]);
+  const [search, setSearch] = useState('');
+  const { delUser, setDelUser } = useContext(deleteUser);
+  const { updateU, setUpdateUser } = useContext(updateData);
+  const [formData, setFormData] = useState([])
   const { udata, setudata } = useContext(addData);
   const navigate = useNavigate();
-  const [ showSpin, setShowSpin ] = useState(true);
-  useEffect(()=> {
-    setTimeout(()=> {
-        setShowSpin(false)
-    },1200)
-  },[])
-
-  // getting all user
+  const [showSpin, setShowSpin] = useState(true);
   useEffect(() => {
-    try {
-      (async()=>{
-        const data = await getAllUser();
-        setFormData(data.data);
-      })()
-    } catch (error) {
-      console.log(error)
-    }
-  },[udata])
+    setTimeout(() => {
+      setShowSpin(false)
+    }, 1200)
+  }, [])
+
 
   // deleteUser
-  const handleDelete =  async(id) => {
+  const handleDelete = async (id) => {
     const data = await deleteSingleUser(id);
-    if(data.status === 200){
+    if (data.status === 200) {
       console.log(data, data.status);
       setDelUser(data.data);
       const udata = await getAllUser();
       setFormData(udata.data);
-    }else{
+    } else {
       toast.error("Cant delete user try again later")
     }
   }
 
-  // for search field 
-  const fetchSearchData = async() => {
-    const response = await searchData(search);
-    setSearchData(response.data);
-  }
-  const prevData = async() => {
-    const data = await getAllUser();
-    setFormData(data.data);
-    console.log(formData)
+
+  // search and get all value
+  const userget = async() => {
+        const response = await getAllUser(search, gender, status, order);
+        if(response.status === 200){
+          setFormData(response.data);
+        }else{
+          console.log("error")
+        }
   }
 
   useEffect(() => {
     // make an api call 
-    if(search.trim() != ''){
-      const debounce = setTimeout(() => {
-        console.log("hitting api") 
-        fetchSearchData();
-      }, 500)
+    const debounce = setTimeout(() => {
+      try {
+        userget();
+      } catch (error) {
+        console.error(error);
+      }
+    }, 100);
 
-      return () => clearTimeout(debounce);
-    }
-    if(search == ''){
-      console.log("am in")
-      prevData()
-    }
-  },[search])
+    return () => clearTimeout(debounce);
+  }, [search, gender, status, order,udata]);
 
-  const handleSearch = async(e) =>{
-    const { value } = e.target;
-    setSearch(value)
-  }
+
   return (
     <>
-    {
-      udata?(<Alert variant="success" onClose={() =>setudata("")} dismissible>{udata.fname.toUpperCase()} Successfully Added</Alert>)  :''
-        ||
-        updateU?(<Alert variant="primary" onClose={() =>setUpdateUser("")} dismissible>{updateU.fname.toUpperCase()} Successfully Updated</Alert>) : ''
-        ||
-        delUser?(<Alert variant="danger" onClose={() =>setDelUser("")} dismissible>{delUser.fname.toUpperCase()} User Deleted</Alert>) : ''
-      
-    }
+      {
+        udata ? (<Alert variant="success" onClose={() => setudata("")} dismissible>{udata.fname.toUpperCase()} Successfully Added</Alert>) : ''
+          ||
+          updateU ? (<Alert variant="primary" onClose={() => setUpdateUser("")} dismissible>{updateU.fname.toUpperCase()} Successfully Updated</Alert>) : ''
+            ||
+            delUser ? (<Alert variant="danger" onClose={() => setDelUser("")} dismissible>{delUser.fname.toUpperCase()} User Deleted</Alert>) : ''
+
+      }
       <div className="container">
         < div className="main_div">
           {/* search and adduser btn */}
@@ -106,8 +93,8 @@ const Home = () => {
                   placeholder="Search"
                   className="me-2"
                   aria-label="Search"
-                  onChange={handleSearch}
-                  // value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                // value={search}
                 />
                 <Button variant="success" className='search_btn'>Search</Button>
               </Form>
@@ -128,36 +115,43 @@ const Home = () => {
                   <Form.Check
                     type={'radio'}
                     label={`All`}
-                    name='All'
-                    value='All'
+                    name='gender'
+                    value={'All'}
+                    onChange={(e) => setGender(e.target.value)}
+                    checked={gender === 'All'}
                     defaultChecked
                   />
                   <Form.Check
                     type={'radio'}
                     label={`Male`}
                     name='gender'
-                    value='Male '
+                    value={'Male'}
+                    onChange={(e) => setGender(e.target.value)}
+                    checked={gender === 'Male'}
                   />
                   <Form.Check
                     type={'radio'}
                     label={`Female`}
                     name='gender'
-                    value='Female'
+                    value={'Female'}
+                    onChange={(e) => setGender(e.target.value)}
+                    checked={gender === 'Female'}
                   />
+
                 </div>
               </div>
             </div>
             {/* sort by value */}
             <div className="filter_newold">
-              <h3>Sort By Value</h3>  
+              <h3>Sort By Value</h3>
               <Dropdown className='text-center'>
                 <Dropdown.Toggle className='dropdown_btn' id="dropdown-basic">
                   <SortIcon />
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
-                  <Dropdown.Item >New</Dropdown.Item>
-                  <Dropdown.Item >Old</Dropdown.Item>
+                  <Dropdown.Item onClick={() => setOrder('new')} >New</Dropdown.Item>
+                  <Dropdown.Item onClick={() => setOrder('old')} >Old</Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
             </div>
@@ -171,6 +165,7 @@ const Home = () => {
                     label={`All`}
                     name='status'
                     value='All'
+                    onChange={(e)=>setStatus(e.target.value)}
                     defaultChecked
                   />
                   <Form.Check
@@ -178,31 +173,35 @@ const Home = () => {
                     label={`Active`}
                     name='status'
                     value='Active'
+                    onChange={(e)=>setStatus(e.target.value)}
+                    checked = {status=='Active'}
                   />
                   <Form.Check
                     type={'radio'}
                     label={`InActive`}
                     name='status'
                     value='InActive'
+                    onChange={(e)=>setStatus(e.target.value)}
+                    checked = {status=='InActive'}
                   />
                 </div>
               </div>
             </div>
           </div>
-          {showSpin?<Spinner/>:<Tables data = {formData} handleDelete ={handleDelete} searchedData = {searchedData}/>}
+          {showSpin ? <Spinner /> : <Tables data={formData} getUser = {userget} handleDelete={handleDelete} searchedData={searchedData} />}
         </div>
       </div>
       <ToastContainer
-      position="top-right"
-      autoClose={5000}
-      hideProgressBar={false}
-      newestOnTop={false}
-      closeOnClick
-      rtl={false}
-      pauseOnFocusLoss
-      draggable
-      pauseOnHover
-      theme="light"
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
       />
       {/* Same as */}
       <ToastContainer />
