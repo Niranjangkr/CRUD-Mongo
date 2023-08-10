@@ -14,9 +14,9 @@ import { BASE_URL } from '../../services/helper'
 import { NavLink } from 'react-router-dom'
 import { updateUserStatus, getAllUser } from '../../services/Apis'
 import { toast } from 'react-toastify'
+import Paginations from '../pagination/Paginations'
 
-const Tables = ({ data, handleDelete, searchedData, getUser }) => {
-
+const Tables = ({ data, page, handleDelete, searchedData, getUser, count, pageCount, handleNext, handlepre, setPage }) => {
   const handleClick = async (id, Status) => {
       const response = await updateUserStatus(id, Status);  
       if(response.status === 200){
@@ -51,7 +51,7 @@ const Tables = ({ data, handleDelete, searchedData, getUser }) => {
                   data.map((ele, index) => {
                     return (
                       <tr key={index}>
-                        <td>{index + 1}</td>
+                        <td>{index+1 + (page - 1) * 4}</td>
                         <td>{ele.fname} {ele.lname}</td>
                         <td>{ele.email}</td>
                         <td>{ele.gender[0]}</td>
@@ -90,7 +90,8 @@ const Tables = ({ data, handleDelete, searchedData, getUser }) => {
                 }
 
               </tbody>
-            </Table>  
+            </Table>   
+            <Paginations setPage={setPage} page= {page} count={count} pageCount={pageCount} handleNext={handleNext} handlepre={handlepre}/>
           </Card>
         </div>
       </Row>

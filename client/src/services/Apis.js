@@ -1,3 +1,4 @@
+import { common } from "@mui/material/colors";
 import { commmonfunction } from "./ApiCall";
 import { BASE_URL } from "./helper";
 
@@ -5,8 +6,8 @@ export const registerFunction = async (data, header) => {
     return await commmonfunction("POST", `${BASE_URL}/user/register`, data, header );
 }
 
-export const getAllUser = async (search, gender, status, order) => {
-    return await commmonfunction("GET", `${BASE_URL}/getUserDetails?search=${search}&gender=${gender}&status=${status}&order=${order}`,"")
+export const getAllUser = async (search, gender, status, order, page) => {
+    return await commmonfunction("GET", `${BASE_URL}/getUserDetails?search=${search}&gender=${gender}&status=${status}&order=${order}&page=${page}`,"")
 }
 
 export const getSingleUser = async (data) => {
@@ -25,7 +26,7 @@ export const updateUserStatus = async(id, data) => {
     return await commmonfunction("PUT", `${BASE_URL}/user/status/${id}`, {data} );
 }
 
+export const exporttocsv = async() => {
+    return await commmonfunction("GET", `${BASE_URL}/userexport`,"")
+}
 
-// export const searchData = async(data) => {
-//     return commmonfunction("GET", `${BASE_URL}/findusers/${data}`);
-// }

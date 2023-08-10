@@ -10,8 +10,9 @@ const router =  require('./routes/router');
 app.use(cors());
 app.use(express.json());
 app.use("/uploads",express.static("./uploads"));
+app.use("/files", express.static("./public/files"));
 
-
+  
 app.use(router);
 
 const start = async () => {

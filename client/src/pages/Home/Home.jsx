@@ -12,13 +12,15 @@ import { addData, updateData, deleteUser } from '../../components/context/Contex
 import { ToastContainer, toast } from 'react-toastify';
 import { getAllUser } from '../../services/Apis'
 import Alert from 'react-bootstrap/Alert'
-import { deleteSingleUser } from '../../services/Apis'
+import { deleteSingleUser, exporttocsv } from '../../services/Apis'
 
 const Home = () => {
-  
-  const [order, setOrder] = useState("new")
-  const [status, setStatus] = useState("All")
-  const [gender, setGender] = useState("All")
+  const [count, setCount] = useState("")
+  const [pageCount, setPageCount] = useState(0);
+  const [page, setPage] = useState(1);
+  const [order, setOrder] = useState("new");
+  const [status, setStatus] = useState("All");
+  const [gender, setGender] = useState("All");
   const [searchedData, setSearchData] = useState([]);
   const [search, setSearch] = useState('');
   const { delUser, setDelUser } = useContext(deleteUser);
@@ -38,7 +40,6 @@ const Home = () => {
   const handleDelete = async (id) => {
     const data = await deleteSingleUser(id);
     if (data.status === 200) {
-      console.log(data, data.status);
       setDelUser(data.data);
       const udata = await getAllUser();
       setFormData(udata.data);
@@ -49,13 +50,15 @@ const Home = () => {
 
 
   // search and get all value
-  const userget = async() => {
-        const response = await getAllUser(search, gender, status, order);
-        if(response.status === 200){
-          setFormData(response.data);
-        }else{
-          console.log("error")
-        }
+  const userget = async () => {
+    const response = await getAllUser(search, gender, status, order, page);
+    if (response.status === 200) {
+      setFormData(response.data.Userdata);
+      setPageCount(response.data.pagination.pageCount)
+      setCount(response.data.pagination.count)
+    } else {
+      console.log("error")
+    }
   }
 
   useEffect(() => {
@@ -69,8 +72,36 @@ const Home = () => {
     }, 100);
 
     return () => clearTimeout(debounce);
-  }, [search, gender, status, order,udata]);
+  }, [search, gender, status, order, udata, page]);
 
+  // export csv
+  const exportuser = async () => {
+    const response = await exporttocsv();
+    if (response.status === 200) {
+      window.open(response.data.downloadUrl);
+    } else {
+      toast.error("error!")
+    }
+  }
+
+  // handleNext button and handlepre
+  const handlepre = () => {
+    setPage(()=> {
+      if (page === 1){
+        return page;
+      }
+      return page - 1;
+    })
+  }
+
+  const handleNext = () => {
+    setPage(() => {
+      if (page === pageCount){
+        return page;
+      };
+      return page + 1;
+    })
+  }
 
   return (
     <>
@@ -106,7 +137,7 @@ const Home = () => {
           {/* exportcsv, gender, status */}
           <div className="filter_div mt-5 d-flex justify-content-between flex-wrap">
             <div className="export_csv">
-              <Button className='export_btn'>Export To CSV</Button>
+              <Button className='export_btn' onClick={exportuser}>Export To CSV</Button>
             </div>
             <div className="filter_gender">
               <div className="filter">
@@ -119,7 +150,7 @@ const Home = () => {
                     value={'All'}
                     onChange={(e) => setGender(e.target.value)}
                     checked={gender === 'All'}
-                    defaultChecked
+                    // defaultChecked
                   />
                   <Form.Check
                     type={'radio'}
@@ -165,30 +196,48 @@ const Home = () => {
                     label={`All`}
                     name='status'
                     value='All'
-                    onChange={(e)=>setStatus(e.target.value)}
-                    defaultChecked
+                    onChange={(e) => setStatus(e.target.value)}
+                    checked={status == 'All'}
+                    // defaultChecked
                   />
                   <Form.Check
                     type={'radio'}
                     label={`Active`}
                     name='status'
                     value='Active'
-                    onChange={(e)=>setStatus(e.target.value)}
-                    checked = {status=='Active'}
+                    onChange={(e) => setStatus(e.target.value)}
+                    checked={status == 'Active'}
                   />
                   <Form.Check
                     type={'radio'}
                     label={`InActive`}
                     name='status'
                     value='InActive'
-                    onChange={(e)=>setStatus(e.target.value)}
-                    checked = {status=='InActive'}
+                    onChange={(e) => setStatus(e.target.value)}
+                    checked={status == 'InActive'}
                   />
                 </div>
               </div>
             </div>
           </div>
-          {showSpin ? <Spinner /> : <Tables data={formData} getUser = {userget} handleDelete={handleDelete} searchedData={searchedData} />}
+          {showSpin ? <Spinner /> : <Tables
+            page={page}
+            data={formData}
+            getUser={userget}
+            handleDelete={handleDelete}
+            searchedData={searchedData}
+            count={count}
+            pageCount={pageCount}
+            handleNext={handleNext}
+            handlepre={handlepre}
+            setPage={setPage}
+          />}
+          {/* <div className='p-4 d-flex justify-content-center'>
+            <button onClick={() => setPage(prev => {
+              return prev === 1 ? 1 : prev - 1;
+            })}>-</button>
+            <button onClick={() => setPage(prev => prev + 1)}>+</button>
+          </div> */}
         </div>
       </div>
       <ToastContainer
@@ -203,13 +252,7 @@ const Home = () => {
         pauseOnHover
         theme="light"
       />
-      {/* Same as */}
       <ToastContainer />
-      {/* <>
-        {
-          formData.map((ele) => <div>{ele}</div>)
-        }
-      </> */}
     </>
   )
 }
