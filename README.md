@@ -1,5 +1,6 @@
 ﻿# CRUD-Mongo
  Deployed site: https://mern-app2.netlify.app/
+ 
 **Local setUp**
 Clone the repo 
 - go to client folder and install all the dependencies using ```npm install``` 
